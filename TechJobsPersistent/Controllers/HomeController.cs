@@ -32,12 +32,56 @@ namespace TechJobsPersistent.Controllers
         [HttpGet("/Add")]
         public IActionResult AddJob()
         {
-            return View();
+            AddJobViewModel viewModel = new AddJobViewModel();
+            viewModel.Employers = context.Employers.ToList();
+            viewModel.Skills = context.Skills.ToList();
+            return View(viewModel);
         }
 
-        public IActionResult ProcessAddJobForm()
+        [HttpPost("/ProcessAddJobForm/")]
+        public IActionResult ProcessAddJobForm(AddJobViewModel viewModel, string employer, string[] selectedSkills)
         {
-            return View();
+            viewModel.EmployerId = int.Parse(employer);
+            viewModel.SkillIds = new List<int>();
+            foreach(string selectedSkill in selectedSkills)
+            {
+                viewModel.SkillIds.Add(int.Parse(selectedSkill));
+            };
+            string jobName = viewModel.JobName;
+
+            if (ModelState.IsValid)
+            {
+                job
+
+
+
+
+                List<Job> existingJob = context.Jobs
+                    .Where(jo => jo.Name == jobName)
+                    .Where(jo => jo.EmployerId == employerId)
+                    .ToList();
+                if (existingJob.Count == 0)
+                {
+                    Job theJob = new Job
+                    {
+                        Name = jobName,
+                        EmployerId = employerId
+                    };
+                    foreach (string skill in selectedSkills)
+                    {
+                        JobSkill jobSkill = new JobSkill();
+                        jobSkill.JobId = theJob.Id;
+                        jobSkill.Job = theJob;
+                        jobSkill.SkillId = int.Parse(skill);
+                        jobSkill.Skill = context.Skills.Find(jobSkill.SkillId);
+                        context.JobSkills.Add(jobSkill);
+                    }
+                    context.Jobs.Add(theJob);
+                    context.SaveChanges();
+                }
+                return Redirect("/Home/");
+            }
+            return View("Add");              
         }
 
         public IActionResult Detail(int id)

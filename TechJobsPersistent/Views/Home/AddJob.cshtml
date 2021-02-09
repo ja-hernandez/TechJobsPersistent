@@ -1,10 +1,39 @@
-﻿<h1>Add a Job</h1>
+﻿@using TechJobsPersistent.ViewModels;
+@model  AddJobViewModel;
+
+<h1>Add a Job</h1>
 
 <form asp-controller="Home" asp-action="ProcessAddJobForm" method="post">
     <div class="form-group">
         <label>Name</label>
-        <input class="form-control" />
-        <span></span>
+        <input class="form-control" asp-for="JobName">
+        <span asp-validation-for="JobName"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="EmployerId">Employers</label>
+        <select name="employer">
+            @foreach (var employer in Model.Employers)
+            {
+                <option value="@employer.Id">@employer.Name</option>
+            }
+        </select>
+        <span asp-validation-for="EmployerId"></span>
+
+        @*<select asp-for="EmployerId" asp-items="Model.Employers"></select>*@
+
+        <a asp-controller="Employer" asp-action="Add">Add Employer</a>
+    </div>
+
+    <div class="form-group">
+
+        @foreach (var skill in Model.Skills)
+        {
+            <label >@skill.Name</label>
+            <input type="checkbox" name="selectedSkills" value="@skill.Id" />
+        }
+        <span asp-validation-for="Skills"></span>
+        <a asp-controller="Skill" asp-action="Add">Add Skills</a>
     </div>
 
     <input type="submit" value="Add Job" />
