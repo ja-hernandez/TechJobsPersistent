@@ -12,4 +12,8 @@
 
 --Part 3
 
+--select distinct skills.Name, skills.Description from skills
+--inner join jobskills on skills.Id = SkillId
+--order by skills.Name;
+
 
