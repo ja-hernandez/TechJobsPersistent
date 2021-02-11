@@ -32,24 +32,42 @@ namespace TechJobsPersistent.Controllers
         [HttpGet("/Add")]
         public IActionResult AddJob()
         {
-            List<Skill> jobSkills = context.Skills.ToList();
-            List<Employer> possibleEmployers = context.Employers.ToList();
-            string jobName = "";
-            AddJobViewModel viewModel = new AddJobViewModel(jobName, possibleEmployers, jobSkills);
-            return View(viewModel);
-            
+            AddJobViewModel viewModel;
+            if (TempData["skills"] != null )
+            {
+                List<Skill> jobSkills = context.Skills.ToList();
+                List<Employer> possibleEmployers = context.Employers.ToList();
+                string jobName = "";
+                viewModel = new AddJobViewModel(jobName, possibleEmployers, jobSkills);
+                viewModel.EmployerId = (int)TempData["employer"];
+                viewModel.SkillIds = new List<int>();
+                foreach (var skill in (string[])TempData["skills"])
+                {
+                    viewModel.SkillIds.Add(int.Parse(skill));
+                };
+                viewModel.JobName = (string)TempData["jobName"];
+                return View(viewModel);
+             }
+            else
+            {
+                List<Skill> jobSkills = context.Skills.ToList();
+                List<Employer> possibleEmployers = context.Employers.ToList();
+                string jobName = "";
+                viewModel = new AddJobViewModel(jobName, possibleEmployers, jobSkills);
+                return View(viewModel);
+            }
         }
 
-        [HttpPost("/ProcessAddJobForm/")]
+        [HttpPost("/Add/")]
         public IActionResult ProcessAddJobForm(AddJobViewModel viewModel, string[] selectedSkills)
         {
 
+            
             if (ModelState.IsValid)
             {
                 string jobName = viewModel.JobName;
                 int employerId = viewModel.EmployerId;
-
-
+                
                 List<Job> existingJobs = context.Jobs
                     .Where(ej => ej.Name == jobName)
                     .Where(ej => ej.EmployerId == employerId)
@@ -63,13 +81,14 @@ namespace TechJobsPersistent.Controllers
                         EmployerId = employerId
                     };
                     context.Jobs.Add(newJob);
-                    context.SaveChanges();
+                    //context.SaveChanges();
                     int jobId = newJob.Id;
                     foreach (var skill in selectedSkills)
                     {
                         JobSkill newJoin = new JobSkill
                         {
                             JobId = jobId,
+                            Job = newJob,
                             SkillId = int.Parse(skill)
                         };
                         context.JobSkills.Add(newJoin);
@@ -78,8 +97,10 @@ namespace TechJobsPersistent.Controllers
                 }
                 return Redirect("/Home");
             }
-
-            return View("AddJob", viewModel);
+            TempData["employer"] = viewModel.EmployerId;
+            TempData["skills"] = selectedSkills;
+            TempData["jobName"] = viewModel.JobName;
+            return RedirectToAction("AddJob", viewModel);
         }
 
         public IActionResult Detail(int id)

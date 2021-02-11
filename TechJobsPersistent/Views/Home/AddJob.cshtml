@@ -3,7 +3,7 @@
 
 <h1>Add a Job</h1>
 
-<form asp-controller="Home" asp-action="ProcessAddJobForm" method="post">
+<form asp-controller="Home" asp-action="AddJob" method="post">
     <div class="form-group">
         <label>Name</label>
         <input class="form-control" asp-for="JobName">
@@ -16,19 +16,24 @@
         <span asp-validation-for="EmployerId"></span>
         <br />
         <a asp-controller="Employer" asp-action="Add">Add Employer</a>
+        @*@Html.HiddenFor(m => m.Employers)*@
     </div>
+    
+
+
 
     <br />
     <div class="form-group">
 
         @foreach (var skill in Model.Skills)
         {
-            <label asp-for="Skills">@skill.Name</label>
+            <label asp-for="@skill.Id">@skill.Name</label>
             <input type="checkbox" name="selectedSkills" value="@skill.Id" />
             <br />
         }
 
         <a asp-controller="Skill" asp-action="Add">Add Skills</a>
+        @*@Html.HiddenFor(m=>m.Skills)*@
     </div>
 
     <input type="submit" value="Add Job" />
